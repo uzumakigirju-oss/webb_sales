@@ -6,6 +6,7 @@
     <title>POS-Терминал</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* === Глобальные цвета под Темную/Светлую тему === */
         body {
             font-family: sans-serif;
             background-color: var(--tg-theme-bg-color, #ffffff);
@@ -16,7 +17,7 @@
         }
         h2, h3 { margin-top: 0; margin-bottom: 10px; font-size: 18px;}
         
-        /* === Вкладки (Категории) === */
+        /* === Вкладки === */
         .tabs {
             display: flex; gap: 5px; margin-bottom: 15px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -24,13 +25,14 @@
         }
         .tab-btn {
             flex: 1; padding: 8px; border: none; border-radius: 12px;
-            background: transparent; color: var(--tg-theme-text-color, #000);
+            background: transparent; 
+            color: var(--tg-theme-hint-color, #888888); /* Серый текст для неактивных */
             font-weight: bold; font-size: 14px; transition: 0.2s;
         }
         .tab-btn.active {
-            background: #ffffff; /* Белый фон для активной вкладки */
+            background: var(--tg-theme-bg-color, #ffffff); /* Адаптивный фон */
+            color: var(--tg-theme-button-color, #007bff); /* Цвет кнопок из темы Telegram */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            color: #007bff;
         }
 
         /* === Сетка товаров === */
@@ -39,17 +41,18 @@
         }
         .product-card {
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border: 1px solid rgba(0,0,0,0.05); border-radius: 20px;
+            border: 1px solid rgba(128,128,128,0.1); border-radius: 20px;
             padding: 8px 5px; min-height: 55px; text-align: center;
-            font-size: 14px; font-weight: bold; color: var(--tg-theme-text-color, #000000);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.1s ease, background-color 0.1s ease;
+            font-size: 14px; font-weight: bold; 
+            color: var(--tg-theme-text-color, #000000); /* Адаптивный текст */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.1s ease, opacity 0.1s ease;
             -webkit-tap-highlight-color: transparent;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         .product-card:active { 
-            transform: scale(0.92); background-color: #ffffff; 
-            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            transform: scale(0.92); 
+            opacity: 0.6; /* Мягкое прожатие вместо белой вспышки */
         }
         .product-card small { font-weight: normal; font-size: 12px; opacity: 0.8; margin-top: 2px;}
 
@@ -61,7 +64,9 @@
         .cart-item { 
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 8px; font-size: 15px; font-weight: 500;
-            background: #ffffff; padding: 8px 10px; border-radius: 12px;
+            background: var(--tg-theme-bg-color, #ffffff); /* Адаптивный фон плашки */
+            color: var(--tg-theme-text-color, #000000); /* Адаптивный текст плашки */
+            padding: 8px 10px; border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .cart-item-info { flex: 1; }
@@ -69,12 +74,13 @@
         
         .ctrl-btn {
             background: var(--tg-theme-secondary-bg-color, #e0e0e0);
+            color: var(--tg-theme-text-color, #000000); /* Адаптивный плюс/минус */
             border: none; border-radius: 8px; width: 30px; height: 30px;
-            font-size: 16px; font-weight: bold; color: #000;
+            font-size: 16px; font-weight: bold; 
             display: flex; justify-content: center; align-items: center;
         }
         .ctrl-btn:active { transform: scale(0.9); }
-        .del-btn { background: #ffebee; color: #d32f2f; }
+        .del-btn { background: #dc3545; color: white; } /* Красная кнопка удаления */
 
         /* === Кнопки оплаты === */
         .btn-row { display: flex; gap: 8px; margin-top: 15px; }
@@ -122,7 +128,7 @@
     <div class="cart-panel">
         <h3>🧾 Текущий чек</h3>
         <div id="cart-items"></div>
-        <hr style="border:0; border-top:1px solid rgba(0,0,0,0.1); margin: 15px 0;">
+        <hr style="border:0; border-top:1px solid var(--tg-theme-hint-color, rgba(0,0,0,0.1)); margin: 15px 0; opacity: 0.3;">
         <h2>Итого: <span id="total-price">0</span> лей</h2>
         
         <div class="btn-row">
@@ -140,11 +146,9 @@
         let cart = [];
         let currentTab = 'all';
 
-        // Идентификаторы владельцев
         const ID_ANYA = 4013760;
         const ID_NINA = 141076129;
 
-        // Загрузка прайса от бота
         const params = new URLSearchParams(window.location.search);
         const catalogData = params.get('catalog');
         if (catalogData) {
@@ -152,19 +156,16 @@
             catch (e) { alert("Ошибка чтения прайс-листа!"); }
         }
 
-        // Переключение вкладок
         function setTab(tabName) {
             tg.HapticFeedback.impactOccurred('light');
             currentTab = tabName;
             
-            // Визуальное переключение
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             
             renderMenu();
         }
 
-        // Отрисовка кнопок товаров с учетом выбранной вкладки
         function renderMenu() {
             const menu = document.getElementById('menu');
             menu.innerHTML = '';
@@ -200,7 +201,6 @@
             updateCartUI();
         }
 
-        // Управление количеством товара внутри корзины
         function changeQty(index, delta) {
             tg.HapticFeedback.impactOccurred('light');
             cart[index].qty += delta;
@@ -210,7 +210,6 @@
             updateCartUI();
         }
 
-        // Удаление конкретной позиции из корзины
         function removeItem(index) {
             tg.HapticFeedback.impactOccurred('medium');
             cart.splice(index, 1);
@@ -232,7 +231,6 @@
             cart.forEach((item, index) => {
                 sum += item.price * item.qty;
                 
-                // Рендерим позицию корзины с кнопками управления (+, -, 🗑)
                 container.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
@@ -251,26 +249,21 @@
             document.getElementById('total-price').innerText = sum;
         }
 
-        // Логика успешной оплаты
         function checkout(paymentType) {
             if (cart.length === 0) return;
             
-            // Вызываем системную вибрацию "Успех"
             tg.HapticFeedback.notificationOccurred('success');
             
-            // Показываем зеленый экран на весь телефон
             const successScreen = document.getElementById('success-screen');
             successScreen.style.display = 'flex';
-            setTimeout(() => { successScreen.style.opacity = '1'; }, 10); // Плавное появление
+            setTimeout(() => { successScreen.style.opacity = '1'; }, 10); 
             
-            // Ждем 1.5 секунды, чтобы кассир и клиент увидели "Оплачено!"
             setTimeout(() => {
                 const data = JSON.stringify({ cart: cart, payment_type: paymentType });
-                tg.sendData(data); // Отправляем чек в питон и автоматически закрываем кассу
+                tg.sendData(data);
             }, 1500);
         }
 
-        // Запуск
         renderMenu();
     </script>
 </body>
