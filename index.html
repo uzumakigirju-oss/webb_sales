@@ -22,7 +22,7 @@
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
             border: none; border-radius: 10px;
             padding: 15px; text-align: center;
-            font-size: 16px; font-weight: bold;
+            font-size: 15px; font-weight: bold;
             color: var(--tg-theme-text-color, #000000);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
@@ -31,7 +31,7 @@
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 15px; border-radius: 10px;
         }
-        .cart-item { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px;}
         .btn-row { display: flex; gap: 10px; margin-top: 15px; }
         .btn-pay {
             flex: 1; padding: 15px; border: none; border-radius: 10px;
@@ -51,7 +51,7 @@
         <div id="cart-items"></div>
         <hr>
         <h2>Итого: <span id="total-price">0</span> лей</h2>
-
+        
         <div class="btn-row">
             <button class="btn-pay btn-card" onclick="checkout('Карта')">💳 Картой</button>
             <button class="btn-pay btn-cash" onclick="checkout('Наличные')">💵 Наличными</button>
@@ -61,17 +61,24 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
 
-        // Каталог продукции
-        const catalog = [
-            { id: 1, name: "Трюфельный брауни", price: 45, owner_id: 141076129 },
-            { id: 2, name: "Шоколадная колбаса", price: 30, owner_id: 141076129 },
-            { id: 3, name: "Корнулеце (порция)", price: 40, owner_id: 141076129 },
-            { id: 4, name: "Эспрессо", price: 25, owner_id: 141076129 }
-        ];
-
+        let catalog = [];
         let cart = [];
+
+        // МАГИЯ: Получаем список товаров из URL, который сгенерировал Python-бот
+        const params = new URLSearchParams(window.location.search);
+        const catalogData = params.get('catalog');
+        
+        if (catalogData) {
+            try {
+                catalog = JSON.parse(catalogData);
+            } catch (e) {
+                alert("Ошибка чтения прайс-листа!");
+            }
+        } else {
+            document.getElementById('menu').innerHTML = "<p>Товары не найдены. Проверьте products.csv</p>";
+        }
 
         function renderMenu() {
             const menu = document.getElementById('menu');
@@ -85,7 +92,7 @@
         }
 
         function addToCart(product) {
-            let item = cart.find(i => i.id === product.id);
+            let item = cart.find(i => i.name === product.name && i.price === product.price);
             if (item) item.qty++;
             else cart.push({ ...product, qty: 1 });
             updateCartUI();
@@ -111,10 +118,10 @@
 
         function checkout(paymentType) {
             if (cart.length === 0) return;
-
-            // Формируем пакет данных и отправляем в Python-бот
+            
+            // Отправляем корзину обратно в Telegram бота
             const data = JSON.stringify({ cart: cart, payment_type: paymentType });
-            tg.sendData(data);
+            tg.sendData(data); 
         }
 
         renderMenu();
