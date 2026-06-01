@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>POS-Терминал</title>
-    <script src="https://telegram.org/js/telegram-web-app.js">
+    
+    <!-- Внешний скрипт Telegram -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Внутренний скрипт с иконками -->
+    <script>
         function getIconForProduct(name) {
             const n = name.toLowerCase();
             if (n.includes('классика') && !n.includes('картошка')) return '📦';
@@ -22,9 +27,10 @@
             if (n.includes('ириска')) return '🍬';
             if (n.includes('овсянка')) return '🍪';
             if (n.includes('рогалик')) return '🥐';
-    return '🏷️'; // Иконка по умолчанию, если ничего не совпало
-}
+            return '🏷️'; // Иконка по умолчанию
+        }
     </script>
+
     <style>
         /* === Глобальные цвета под Темную/Светлую тему === */
         body {
@@ -36,7 +42,7 @@
             padding-bottom: 20px;
         }
         h2, h3 { margin-top: 0; margin-bottom: 10px; font-size: 18px;}
-        
+
         /* === Вкладки === */
         .tabs {
             display: flex; gap: 5px; margin-bottom: 15px;
@@ -45,7 +51,7 @@
         }
         .tab-btn {
             flex: 1; padding: 8px; border: none; border-radius: 12px;
-            background: transparent; 
+            background: transparent;
             color: var(--tg-theme-hint-color, #888888); /* Серый текст для неактивных */
             font-weight: bold; font-size: 14px; transition: 0.2s;
         }
@@ -63,15 +69,15 @@
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
             border: 1px solid rgba(128,128,128,0.1); border-radius: 20px;
             padding: 8px 5px; min-height: 55px; text-align: center;
-            font-size: 14px; font-weight: bold; 
+            font-size: 14px; font-weight: bold;
             color: var(--tg-theme-text-color, #000000); /* Адаптивный текст */
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: transform 0.1s ease, opacity 0.1s ease;
             -webkit-tap-highlight-color: transparent;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .product-card:active { 
-            transform: scale(0.92); 
+        .product-card:active {
+            transform: scale(0.92);
             opacity: 0.6; /* Мягкое прожатие вместо белой вспышки */
         }
         .product-card small { font-weight: normal; font-size: 12px; opacity: 0.8; margin-top: 2px;}
@@ -81,7 +87,7 @@
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 12px; border-radius: 15px;
         }
-        .cart-item { 
+        .cart-item {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 8px; font-size: 15px; font-weight: 500;
             background: var(--tg-theme-bg-color, #ffffff); /* Адаптивный фон плашки */
@@ -91,12 +97,12 @@
         }
         .cart-item-info { flex: 1; }
         .cart-controls { display: flex; align-items: center; gap: 8px; }
-        
+
         .ctrl-btn {
             background: var(--tg-theme-secondary-bg-color, #e0e0e0);
             color: var(--tg-theme-text-color, #000000); /* Адаптивный плюс/минус */
             border: none; border-radius: 8px; width: 30px; height: 30px;
-            font-size: 16px; font-weight: bold; 
+            font-size: 16px; font-weight: bold;
             display: flex; justify-content: center; align-items: center;
         }
         .ctrl-btn:active { transform: scale(0.9); }
@@ -112,8 +118,8 @@
         .btn-card { background-color: #007bff; }
         .btn-cash { background-color: #28a745; }
         .btn-clear {
-            margin-top: 10px; width: 100%; padding: 12px; 
-            border-radius: 15px; border: none; 
+            margin-top: 10px; width: 100%; padding: 12px;
+            border-radius: 15px; border: none;
             background: #dc3545; color: white; font-weight: bold;
         }
         .btn-clear:active { transform: scale(0.95); }
@@ -150,7 +156,7 @@
         <div id="cart-items"></div>
         <hr style="border:0; border-top:1px solid var(--tg-theme-hint-color, rgba(0,0,0,0.1)); margin: 15px 0; opacity: 0.3;">
         <h2>Итого: <span id="total-price">0</span> лей</h2>
-        
+
         <div class="btn-row">
             <button class="btn-pay btn-card" onclick="checkout('Карта')">💳 Картой</button>
             <button class="btn-pay btn-cash" onclick="checkout('Наличные')">💵 Наличными</button>
@@ -172,17 +178,17 @@
         const params = new URLSearchParams(window.location.search);
         const catalogData = params.get('catalog');
         if (catalogData) {
-            try { catalog = JSON.parse(catalogData); } 
+            try { catalog = JSON.parse(catalogData); }
             catch (e) { alert("Ошибка чтения прайс-листа!"); }
         }
 
         function setTab(tabName) {
             tg.HapticFeedback.impactOccurred('light');
             currentTab = tabName;
-            
+
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
-            
+
             renderMenu();
         }
 
@@ -205,7 +211,8 @@
             filteredCatalog.forEach(p => {
                 let btn = document.createElement('button');
                 btn.className = 'product-card';
-                btn.innerHTML = `<span>${p.name}</span><small>${p.price} лей</small>`;
+                // Применяем функцию с иконкой прямо здесь к названию товара
+                btn.innerHTML = `<span>${getIconForProduct(p.name)} ${p.name}</span><small>${p.price} лей</small>`;
                 btn.onclick = () => {
                     tg.HapticFeedback.impactOccurred('light');
                     addToCart(p);
@@ -250,11 +257,11 @@
 
             cart.forEach((item, index) => {
                 sum += item.price * item.qty;
-                
+
                 container.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
-                        <b>${item.name}</b><br>
+                        <b>${getIconForProduct(item.name)} ${item.name}</b><br>
                         <small style="opacity:0.6;">${item.price} л. x ${item.qty} = ${item.price * item.qty} л.</small>
                     </div>
                     <div class="cart-controls">
@@ -271,13 +278,13 @@
 
         function checkout(paymentType) {
             if (cart.length === 0) return;
-            
+
             tg.HapticFeedback.notificationOccurred('success');
-            
+
             const successScreen = document.getElementById('success-screen');
             successScreen.style.display = 'flex';
-            setTimeout(() => { successScreen.style.opacity = '1'; }, 10); 
-            
+            setTimeout(() => { successScreen.style.opacity = '1'; }, 10);
+
             setTimeout(() => {
                 const data = JSON.stringify({ cart: cart, payment_type: paymentType });
                 tg.sendData(data);
