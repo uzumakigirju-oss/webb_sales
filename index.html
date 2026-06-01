@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>POS-Терминал</title>
     
-    <!-- Внешний скрипт Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Внутренний скрипт с иконками -->
     <script>
         function getIconForProduct(name) {
             const n = name.toLowerCase();
@@ -27,12 +25,11 @@
             if (n.includes('ириска')) return '🍬';
             if (n.includes('овсянка')) return '🍪';
             if (n.includes('рогалик')) return '🥐';
-            return '🏷️'; // Иконка по умолчанию
+            return '🏷️';
         }
     </script>
 
     <style>
-        /* === Глобальные цвета под Темную/Светлую тему === */
         body {
             font-family: sans-serif;
             background-color: var(--tg-theme-bg-color, #ffffff);
@@ -43,7 +40,6 @@
         }
         h2, h3 { margin-top: 0; margin-bottom: 10px; font-size: 18px;}
 
-        /* === Вкладки === */
         .tabs {
             display: flex; gap: 5px; margin-bottom: 15px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -52,16 +48,15 @@
         .tab-btn {
             flex: 1; padding: 8px; border: none; border-radius: 12px;
             background: transparent;
-            color: var(--tg-theme-hint-color, #888888); /* Серый текст для неактивных */
+            color: var(--tg-theme-hint-color, #888888);
             font-weight: bold; font-size: 14px; transition: 0.2s;
         }
         .tab-btn.active {
-            background: var(--tg-theme-bg-color, #ffffff); /* Адаптивный фон */
-            color: var(--tg-theme-button-color, #007bff); /* Цвет кнопок из темы Telegram */
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-button-color, #007bff);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* === Сетка товаров === */
         .grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px;
         }
@@ -70,7 +65,7 @@
             border: 1px solid rgba(128,128,128,0.1); border-radius: 20px;
             padding: 8px 5px; min-height: 55px; text-align: center;
             font-size: 14px; font-weight: bold;
-            color: var(--tg-theme-text-color, #000000); /* Адаптивный текст */
+            color: var(--tg-theme-text-color, #000000);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: transform 0.1s ease, opacity 0.1s ease;
             -webkit-tap-highlight-color: transparent;
@@ -78,11 +73,10 @@
         }
         .product-card:active {
             transform: scale(0.92);
-            opacity: 0.6; /* Мягкое прожатие вместо белой вспышки */
+            opacity: 0.6;
         }
         .product-card small { font-weight: normal; font-size: 12px; opacity: 0.8; margin-top: 2px;}
 
-        /* === Корзина и управление чеком === */
         .cart-panel {
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 12px; border-radius: 15px;
@@ -90,8 +84,8 @@
         .cart-item {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 8px; font-size: 15px; font-weight: 500;
-            background: var(--tg-theme-bg-color, #ffffff); /* Адаптивный фон плашки */
-            color: var(--tg-theme-text-color, #000000); /* Адаптивный текст плашки */
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
             padding: 8px 10px; border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
@@ -100,15 +94,14 @@
 
         .ctrl-btn {
             background: var(--tg-theme-secondary-bg-color, #e0e0e0);
-            color: var(--tg-theme-text-color, #000000); /* Адаптивный плюс/минус */
+            color: var(--tg-theme-text-color, #000000);
             border: none; border-radius: 8px; width: 30px; height: 30px;
             font-size: 16px; font-weight: bold;
             display: flex; justify-content: center; align-items: center;
         }
         .ctrl-btn:active { transform: scale(0.9); }
-        .del-btn { background: #dc3545; color: white; } /* Красная кнопка удаления */
+        .del-btn { background: #dc3545; color: white; }
 
-        /* === Кнопки оплаты === */
         .btn-row { display: flex; gap: 8px; margin-top: 15px; }
         .btn-pay {
             flex: 1; padding: 15px; border: none; border-radius: 15px;
@@ -124,7 +117,6 @@
         }
         .btn-clear:active { transform: scale(0.95); }
 
-        /* === Экран успешной оплаты === */
         #success-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #28a745; color: white;
@@ -203,6 +195,10 @@
                 filteredCatalog = catalog.filter(p => p.owner_id === ID_NINA);
             }
 
+            // --- СОРТИРОВКА ПО АЛФАВИТУ ---
+            filteredCatalog.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+            // ------------------------------
+
             if (filteredCatalog.length === 0) {
                 menu.innerHTML = "<p style='grid-column: span 2; text-align:center; opacity:0.5;'>В этой категории пока нет товаров</p>";
                 return;
@@ -211,7 +207,6 @@
             filteredCatalog.forEach(p => {
                 let btn = document.createElement('button');
                 btn.className = 'product-card';
-                // Применяем функцию с иконкой прямо здесь к названию товара
                 btn.innerHTML = `<span>${getIconForProduct(p.name)} ${p.name}</span><small>${p.price} лей</small>`;
                 btn.onclick = () => {
                     tg.HapticFeedback.impactOccurred('light');
