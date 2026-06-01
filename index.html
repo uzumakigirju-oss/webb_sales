@@ -4,7 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>POS-Терминал</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js">
+        function getIconForProduct(name) {
+            const n = name.toLowerCase();
+            if (n.includes('классика') && !n.includes('картошка')) return '📦';
+            if (n.includes('ас.премиум')) return '✨';
+            if (n.includes('ас.лайт')) return '🌤️';
+            if (n.includes('ассорти')) return '🎁';
+            if (n.includes('брауни') && n.includes('орешки')) return '🍫🥜';
+            if (n.includes('брауни')) return '🍫';
+            if (n.includes('колбаса')) return '🪵';
+            if (n.includes('картошка')) return '🥔';
+            if (n.includes('орешек')) return '🌰';
+            if (n.includes('грибочки')) return '🍄';
+            if (n.includes('муравейник')) return '🧁';
+            if (n.includes('трубочк')) return '🧇';
+            if (n.includes('ириска')) return '🍬';
+            if (n.includes('овсянка')) return '🍪';
+            if (n.includes('рогалик')) return '🥐';
+    return '🏷️'; // Иконка по умолчанию, если ничего не совпало
+}
+    </script>
     <style>
         /* === Глобальные цвета под Темную/Светлую тему === */
         body {
