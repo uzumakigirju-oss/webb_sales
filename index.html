@@ -28,46 +28,26 @@
             if (n.includes('рогалик')) return '🥐';
             return '🏷️';
         }
-        // Функция для получения реальных картинок товаров (Unsplash)
+
+        // Функция для получения реальных картинок товаров (3D рендеры из папки images)
         function getImageUrlForProduct(name) {
             const n = name.toLowerCase();
-            if (n.includes('брауни') && n.includes('ореш')) {
-                return 'https://images.unsplash.com/photo-1541795795328-f073b763494e?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('брауни')) {
-                return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('ириска')) {
-                return 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('рогалик') || n.includes('рогалики')) {
-                return 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('колбаса')) {
-                return 'https://images.unsplash.com/photo-1612195583950-b8fd34c87093?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('орешек') || n.includes('орешки')) {
-                return 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('грибочки')) {
-                return 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('муравейник')) {
-                return 'https://images.unsplash.com/photo-1558961309-dbdf0f025683?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('трубочк') || n.includes('трубочка')) {
-                return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('овсянка')) {
-                return 'https://images.unsplash.com/photo-1558961309-dbdf0f025683?auto=format&fit=crop&w=300&q=80';
-            }
-            if (n.includes('картошка')) {
-                return 'https://images.unsplash.com/photo-1600431521340-491ecd88062c?auto=format&fit=crop&w=300&q=80';
-            }
-            // Дефолтное изображение сладостей
-            return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80';
+            if (n.includes('классика') && !n.includes('картошка')) return './images/klassika.png';
+            if (n.includes('ас.премиум') || n.includes('ас.лайт') || n.includes('ассорти')) return './images/assorti.png';
+            if (n.includes('брауни')) return './images/brownie.png';
+            if (n.includes('колбаса')) return './images/kolbasa.png';
+            if (n.includes('орешек') || n.includes('орешки')) return './images/oreshek.png';
+            if (n.includes('грибочки')) return './images/gribochki.png';
+            if (n.includes('муравейник')) return './images/muraveynik.png';
+            if (n.includes('трубочк') || n.includes('трубочка')) return './images/trubochki.png';
+            if (n.includes('ириска')) return './images/iriska.png';
+            if (n.includes('овсянка')) return './images/ovsyanka.png';
+            if (n.includes('картошка')) return './images/kartoshka.png';
+            if (n.includes('рогалик') || n.includes('рогалики')) return './images/rogaliki.png';
+            return './images/default.png';
         }
     </script>
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -78,6 +58,7 @@
             padding-bottom: 30px;
         }
         h2, h3 { margin-top: 0; margin-bottom: 12px; font-size: 18px; font-weight: 700; }
+
         .tabs {
             display: flex; gap: 6px; margin-bottom: 16px;
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -95,6 +76,7 @@
             color: var(--tg-theme-text-color, #000000);
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
+
         /* Квадратные карточки товаров */
         .grid {
             display: grid; 
@@ -153,6 +135,7 @@
             color: var(--tg-theme-hint-color, #666666);
             margin-top: 4px;
         }
+
         .cart-panel {
             background: var(--tg-theme-secondary-bg-color, #f5f5f5);
             border-radius: 20px; 
@@ -174,6 +157,7 @@
         .cart-item-info b { font-size: 13px; }
         .cart-item-info small { font-size: 11px; color: var(--tg-theme-hint-color, #888888); }
         .cart-controls { display: flex; align-items: center; gap: 8px; }
+
         .ctrl-btn {
             background: var(--tg-theme-secondary-bg-color, #e0e0e0);
             color: var(--tg-theme-text-color, #000000);
@@ -184,6 +168,7 @@
         }
         .ctrl-btn:active { transform: scale(0.9); }
         .del-btn { background: #ff3b30; color: white; }
+
         .btn-row { display: flex; gap: 8px; margin-top: 15px; }
         .btn-pay {
             flex: 1; padding: 14px; border: none; border-radius: 12px;
@@ -202,6 +187,7 @@
             cursor: pointer;
         }
         .btn-clear:active { transform: scale(0.96); }
+
         #success-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #34c759; color: white;
@@ -213,19 +199,23 @@
     </style>
 </head>
 <body>
+
     <div id="success-screen">
         <div class="success-icon">✅</div>
         <h1 style="margin:0; font-size: 28px;">Оплачено!</h1>
         <p style="font-size:16px; opacity:0.9; margin-top: 8px;">Чек закрыт</p>
     </div>
+
     <!-- Переключатель категорий -->
     <div class="tabs">
         <button class="tab-btn active" id="tab-all" onclick="setTab('all')">Все</button>
         <button class="tab-btn" id="tab-anya" onclick="setTab('anya')">Товары Ани</button>
         <button class="tab-btn" id="tab-nina" onclick="setTab('nina')">Товары Нины</button>
     </div>
+
     <!-- Сетка квадратных карточек с картинками -->
     <div class="grid" id="menu"></div>
+
     <!-- Текущий чек -->
     <div class="cart-panel">
         <h3>🧾 Текущий чек</h3>
@@ -235,48 +225,61 @@
             <span>Итого:</span>
             <span><span id="total-price">0</span> лей</span>
         </h2>
+
         <div class="btn-row">
             <button class="btn-pay btn-cash" onclick="checkout('Наличные')">💵 Наличными</button>
             <button class="btn-pay btn-card" onclick="checkout('Карта')">💳 Картой</button>
         </div>
         <button class="btn-clear" onclick="clearCart()">Очистить корзину</button>
     </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+
         let catalog = [];
         let cart = [];
         let currentTab = 'all';
+
         const ID_ANYA = 4013760;
         const ID_NINA = 141076129;
+
         const params = new URLSearchParams(window.location.search);
         const catalogData = params.get('catalog');
         if (catalogData) {
             try { catalog = JSON.parse(catalogData); }
             catch (e) { alert("Ошибка чтения прайс-листа!"); }
         }
+
         function setTab(tabName) {
             tg.HapticFeedback.impactOccurred('light');
             currentTab = tabName;
+
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
+
             renderMenu();
         }
+
         function renderMenu() {
             const menu = document.getElementById('menu');
             menu.innerHTML = '';
+
             let filteredCatalog = catalog;
             if (currentTab === 'anya') {
                 filteredCatalog = catalog.filter(p => p.owner_id === ID_ANYA);
             } else if (currentTab === 'nina') {
                 filteredCatalog = catalog.filter(p => p.owner_id === ID_NINA);
             }
+
             // Сортировка по алфавиту
             filteredCatalog.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+
             if (filteredCatalog.length === 0) {
                 menu.innerHTML = "<p style='grid-column: span 2; text-align:center; opacity:0.5; padding: 20px 0;'>В этой категории пока нет товаров</p>";
                 return;
             }
+
             filteredCatalog.forEach(p => {
                 let btn = document.createElement('button');
                 btn.className = 'product-card';
@@ -294,12 +297,14 @@
                 menu.appendChild(btn);
             });
         }
+
         function addToCart(product) {
             let item = cart.find(i => i.name === product.name && i.price === product.price);
             if (item) item.qty++;
             else cart.push({ ...product, qty: 1 });
             updateCartUI();
         }
+
         function changeQty(index, delta) {
             tg.HapticFeedback.impactOccurred('light');
             cart[index].qty += delta;
@@ -308,23 +313,28 @@
             }
             updateCartUI();
         }
+
         function removeItem(index) {
             tg.HapticFeedback.impactOccurred('medium');
             cart.splice(index, 1);
             updateCartUI();
         }
+
         function clearCart() {
             if (cart.length === 0) return;
             tg.HapticFeedback.impactOccurred('heavy');
             cart = [];
             updateCartUI();
         }
+
         function updateCartUI() {
             const container = document.getElementById('cart-items');
             container.innerHTML = '';
             let sum = 0;
+
             cart.forEach((item, index) => {
                 sum += item.price * item.qty;
+
                 container.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
@@ -339,19 +349,25 @@
                     </div>
                 </div>`;
             });
+
             document.getElementById('total-price').innerText = sum;
         }
+
         function checkout(paymentType) {
             if (cart.length === 0) return;
+
             tg.HapticFeedback.notificationOccurred('success');
+
             const successScreen = document.getElementById('success-screen');
             successScreen.style.display = 'flex';
             setTimeout(() => { successScreen.style.opacity = '1'; }, 10);
+
             setTimeout(() => {
                 const data = JSON.stringify({ cart: cart, payment_type: paymentType });
                 tg.sendData(data);
             }, 1500);
         }
+
         renderMenu();
     </script>
 </body>
