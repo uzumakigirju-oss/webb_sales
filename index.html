@@ -10,22 +10,19 @@
     <script>
         function getIconForProduct(name) {
             const n = name.toLowerCase();
-            if (n.includes('классика') && !n.includes('картошка')) return '📦';
-            if (n.includes('ас.премиум')) return '🌰✨';
-            if (n.includes('ас.лайт')) return '🌰🌤️';
-            if (n.includes('ассорти')) return '🌰🎁';
-            if (n.includes('брауни') && n.includes('орешки')) return '🍫🌰';
-            if (n.includes('брауни')) return '🍫';
-            if (n.includes('колбаса')) return '🪵';
-            if (n.includes('картошка')) return '🥔';
-            if (n.includes('орешек')) return '🌰';
-            if (n.includes('грибочки')) return '🍄';
-            if (n.includes('муравейник')) return '🐜';
-            if (n.includes('трубочк')) return '🧇';
-            if (n.includes('ириска')) return '🍬';
-            if (n.includes('овсянка')) return '🍪';
-            if (n.includes('рогалик')) return '🥐';
-            return '🏷️';
+            if (n.includes('классика') && !n.includes('картошка')) return './images/klassika.webp';
+            if (n.includes('ас.премиум') || n.includes('ас.лайт') || n.includes('ассорти')) return './images/assorti.webp';
+            if (n.includes('брауни')) return './images/brownie.webp';
+            if (n.includes('колбаса')) return './images/kolbasa.webp';
+            if (n.includes('орешек') || n.includes('орешки')) return './images/oreshek.webp';
+            if (n.includes('грибочки')) return './images/gribochki.webp';
+            if (n.includes('муравейник')) return './images/muraveynik.webp';
+            if (n.includes('трубочк') || n.includes('трубочка')) return './images/trubochki.webp';
+            if (n.includes('ириска')) return './images/iriska.webp';
+            if (n.includes('овсянка')) return './images/ovsyanka.webp';
+            if (n.includes('картошка')) return './images/kartoshka.webp';
+            if (n.includes('рогалик') || n.includes('рогалики')) return './images/rogaliki.webp';
+            return './images/default.webp';
         }
     </script>
 
