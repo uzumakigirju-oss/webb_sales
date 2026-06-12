@@ -8,27 +8,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <script>
-        // Функция для эмодзи-иконки в чеке
-        function getIconForProduct(name) {
-            const n = name.toLowerCase();
-            if (n.includes('классика') && !n.includes('картошка')) return '📦';
-            if (n.includes('ас.премиум')) return '🌰✨';
-            if (n.includes('ас.лайт')) return '🌰🌤️';
-            if (n.includes('ассорти')) return '🌰🎁';
-            if (n.includes('брауни') && n.includes('орешки')) return '🍫🌰';
-            if (n.includes('брауни')) return '🍫';
-            if (n.includes('колбаса')) return '🪵';
-            if (n.includes('картошка')) return '🥔';
-            if (n.includes('орешек')) return '🌰';
-            if (n.includes('грибочки')) return '🍄';
-            if (n.includes('муравейник')) return '🐜';
-            if (n.includes('трубочк')) return '🧇';
-            if (n.includes('ириска')) return '🍬';
-            if (n.includes('овсянка')) return '🍪';
-            if (n.includes('рогалик')) return '🥐';
-            return '🏷️';
-        }
-
         // Функция для получения реальных картинок товаров (3D рендеры из папки images)
         function getImageUrlForProduct(name, ownerId) {
             const n = name.toLowerCase();
@@ -219,7 +198,7 @@
 
     <!-- Текущий чек -->
     <div class="cart-panel">
-        <h3>🧾 Текущий чек</h3>
+        <h3>Текущий чек</h3>
         <div id="cart-items"></div>
         <hr style="border:0; border-top:1px solid rgba(128,128,128,0.2); margin: 12px 0;">
         <h2 style="font-size: 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -228,8 +207,8 @@
         </h2>
 
         <div class="btn-row">
-            <button class="btn-pay btn-cash" onclick="checkout('Наличные')">💵 Наличными</button>
-            <button class="btn-pay btn-card" onclick="checkout('Карта')">💳 Картой</button>
+            <button class="btn-pay btn-cash" onclick="checkout('Наличные')">Наличными</button>
+            <button class="btn-pay btn-card" onclick="checkout('Карта')">Картой</button>
         </div>
         <button class="btn-clear" onclick="clearCart()">Очистить корзину</button>
     </div>
@@ -339,7 +318,7 @@
                 container.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
-                        <b>${getIconForProduct(item.name)} ${item.name}</b><br>
+                        <b>${item.name}</b><br>
                         <small>${item.price} л. x ${item.qty} = ${item.price * item.qty} л.</small>
                     </div>
                     <div class="cart-controls">
