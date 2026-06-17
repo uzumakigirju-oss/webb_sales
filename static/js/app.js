@@ -172,7 +172,7 @@ async function confirmCloseShift() {
         state.shiftOwnerName = null;
         updateUI();
         alert('📊 Итоги смены:\n\n' + data.report);
-        setImmediate(() => loadFair()); // перезагрузим состояние
+        setTimeout(() => loadFair(), 0);
     } catch (e) {
         alert(e.message);
     }
