@@ -5,7 +5,7 @@ from datetime import datetime
 from aiogram import Router, F, types
 from config import ALLOWED_USERS
 from database import db_get_user_fair, db_shift_is_open
-from sales_manager import write_sales_batch
+from sales_manager import write_sales_batch, generate_check_id
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -47,8 +47,9 @@ async def web_app_data_handler(message: types.Message) -> None:
             for _ in range(qty):
                 rows_to_write.append([date_now, name, price, owner_id, cashier_id, payment_type])
 
-        # Асинхронно записываем чеки под блокировкой
-        await write_sales_batch(fair_name, rows_to_write)
+        check_id = generate_check_id()
+
+        await write_sales_batch(fair_name, rows_to_write, check_id)
 
         logger.info(f"Действие: Продажа на {fair_name}. Пользователь: {message.from_user.first_name} ({cashier_id}). Сумма: {total_sum} л. Оплата: {payment_type}. Товары: {cart}")
 

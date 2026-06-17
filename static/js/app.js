@@ -381,7 +381,7 @@ async function loadChecks() {
         }
         listEl.innerHTML = data.checks.map((c, i) => {
             const num = data.checks.length - i;
-            const date = new Date(c.date).toLocaleString('ru-RU', {
+            const date = new Date(c.date.replace(' ', 'T')).toLocaleString('ru-RU', {
                 day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit'
             });
             const icon = c.payment_type === 'Карта' ? '💳' : '💵';
@@ -422,7 +422,7 @@ async function showCheckDetail(checkId) {
     listEl.style.display = 'none';
     try {
         const check = await api(`/api/stats/check/${checkId}`);
-        const date = new Date(check.date).toLocaleString('ru-RU', {
+        const date = new Date(check.date.replace(' ', 'T')).toLocaleString('ru-RU', {
             day: 'numeric', month: 'numeric', year: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });
@@ -559,7 +559,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
 
-            if (btn.dataset.tab === 'stats') loadStats();
+            if (btn.dataset.tab === 'stats') {
+                currentStatsTab = 'me';
+                document.querySelectorAll('[data-stats-tab]').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-stats-tab="me"]').classList.add('active');
+                document.getElementById('checksList').style.display = 'none';
+                document.getElementById('checkDetail').style.display = 'none';
+                document.getElementById('statsContent').style.display = 'block';
+                loadStats();
+            }
             if (btn.dataset.tab === 'files') loadFiles();
         });
     });
