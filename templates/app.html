@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Omnom & SweetMe — Касса</title>
+    <meta name="user-id" content="{{ user_id }}">
+    <meta name="user-name" content="{{ user_name }}">
+    <link rel="stylesheet" href="/static/css/app.css?v={{ cache_buster }}">
+</head>
+<body>
+
+<div id="app">
+    <!-- Шапка -->
+    <header>
+        <div class="header-left">
+            <span class="logo">🧁</span>
+            <div>
+                <div class="app-title">Omnom & SweetMe</div>
+                <div class="user-name" id="userName">{{ user_name }}</div>
+            </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Выйти</button>
+    </header>
+
+    <!-- Состояние: выбор ярмарки -->
+    <div id="fairSelection" class="screen">
+        <div class="fair-cards">
+            <div class="fair-card" onclick="selectFair('Yardsale')">
+                <div class="fair-icon">🎪</div>
+                <div class="fair-name">Yardsale</div>
+            </div>
+            <div class="fair-card" onclick="selectFair('Ecolocal')">
+                <div class="fair-icon">🌿</div>
+                <div class="fair-name">Ecolocal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div id="mainInterface" class="screen" style="display:none">
+        <!-- Информационная панель -->
+        <div class="info-bar">
+            <div class="fair-info">
+                <span id="fairIcon">🎪</span>
+                <span id="fairName">Yardsale</span>
+            </div>
+            <div class="shift-badge" id="shiftBadge">
+                <span class="dot closed"></span> Смена закрыта
+            </div>
+            <div id="shiftActions"></div>
+        </div>
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="pos">🛒 Касса</button>
+            <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+            <button class="tab-btn" data-tab="files">📁 Файлы</button>
+        </div>
+
+        <!-- Вкладка: Касса -->
+        <div id="tab-pos" class="tab-content active">
+            <div class="tab-bar">
+                <button class="tab-btn small active" data-prod-tab="all">Все</button>
+                <button class="tab-btn small" data-prod-tab="anya">Товары Ани</button>
+                <button class="tab-btn small" data-prod-tab="nina">Товары Нины</button>
+            </div>
+            <div class="pos-layout">
+                <div class="products-grid" id="productsGrid"></div>
+                <div class="cart-panel" id="cartPanel">
+                    <h3>Текущий чек</h3>
+                    <div id="cartItems"></div>
+                    <div class="cart-total">
+                        <span>Итого:</span>
+                        <span><b id="totalPrice">0</b> лей</span>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn-pay btn-cash" onclick="checkout('Наличные')">💵 Наличными</button>
+                        <button class="btn-pay btn-card" onclick="checkout('Карта')">💳 Картой</button>
+                    </div>
+                    <button class="btn-clear" onclick="clearCart()">🗑 Очистить корзину</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка: Статистика -->
+        <div id="tab-stats" class="tab-content">
+            <div class="tab-bar">
+                <button class="tab-btn small active" data-stats-tab="me">📈 Моя статистика</button>
+                <button class="tab-btn small" data-stats-tab="all">📊 Общая статистика</button>
+                <button class="tab-btn small" data-stats-tab="checks">🧾 Чеки</button>
+            </div>
+            <div class="stats-content" id="statsContent">
+                <p class="hint">Загрузка...</p>
+            </div>
+            <div class="checks-list" id="checksList"></div>
+            <div class="check-detail" id="checkDetail"></div>
+        </div>
+
+        <!-- Вкладка: Файлы -->
+        <div id="tab-files" class="tab-content">
+            <div class="file-upload-area">
+                <label class="upload-btn">
+                    📎 Загрузить файл
+                    <input type="file" id="fileInput" onchange="uploadFile(this)" hidden>
+                </label>
+            </div>
+            <div class="file-list" id="fileList">
+                <p class="hint">Файлов пока нет.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран успешной оплаты -->
+    <div id="successScreen">
+        <div class="success-icon">✅</div>
+        <h1>Оплачено!</h1>
+        <p>Чек закрыт</p>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div id="confirmModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <h3>Подтверждение</h3>
+        <p id="modalText"></p>
+        <div class="modal-actions">
+            <button class="btn-primary" id="modalConfirm">Да</button>
+            <button class="btn-secondary" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно выбора ярмарки -->
+<div id="fairChoiceModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <h3>⚡ Смена уже открыта</h3>
+        <p id="fairChoiceText"></p>
+        <div class="modal-actions" style="flex-direction:column;gap:8px;">
+            <button class="btn-primary" id="btnJoinFair" style="width:100%;">✅ Присоединиться</button>
+            <button class="btn-primary" id="btnOpenOther" style="width:100%;background:#43a047;">🔄 Открыть другую</button>
+            <button class="btn-secondary" onclick="closeFairChoiceModal()" style="width:100%;">❌ Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="/static/js/app.js?v={{ cache_buster }}"></script>
+</body>
+</html>

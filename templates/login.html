@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omnom & SweetMe — Вход</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0, #f48fb1);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .logo { font-size: 56px; margin-bottom: 12px; }
+        h1 {
+            font-size: 24px;
+            color: #5d4037;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            color: #8d6e63;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 12px; }
+        .form-group input {
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-group input:focus { border-color: #f48fb1; }
+        .form-group button {
+            padding: 14px;
+            background: #e91e63;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .form-group button:hover { background: #c2185b; }
+        .form-group button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error { color: #d32f2f; font-size: 13px; margin-top: 8px; display: none; }
+        .user-hint { font-size: 12px; color: #999; margin-top: 6px; }
+        .user-hint span { color: #5d4037; font-weight: 600; }
+        .help {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">🧁</div>
+        <h1>Omnom &amp; SweetMe</h1>
+        <p class="subtitle">Касса / POS-терминал</p>
+
+        <form class="form-group" id="loginForm" style="display: none;">
+            <input type="number" id="userId" placeholder="Ваш Telegram ID">
+            <button type="submit" id="loginBtn">🔑 Войти вручную (Для отладки)</button>
+            <div class="error" id="errorMsg"></div>
+        </form>
+
+        <div id="telegramAuthBlock" style="margin: 20px 0;">
+            <a id="botLink" href="#" target="_blank" style="display: block; padding: 14px; background: #0088cc; color: white; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 16px;">
+                ✈️ Войти через Telegram-бота
+            </a>
+            <p style="font-size: 13px; color: #666; margin-top: 10px;">
+                Нажмите на кнопку, перейдите в бота и нажмите СТАРТ. Страница обновится автоматически.
+            </p>
+        </div>
+
+        <div class="user-hint">
+            Разрешённые пользователи:<br>
+            <span id="userList">Загрузка...</span>
+        </div>
+
+        <div class="help">
+            <b>Как войти?</b><br>
+            Введите ваш Telegram ID и нажмите "Войти"
+        </div>
+    </div>
+
+    <script>
+        let currentLoginCode = null;
+        let pollInterval = null;
+
+        async function initAuth() {
+            try {
+                const resp = await fetch('/api/auth/generate_login');
+                const data = await resp.json();
+                if (data.ok) {
+                    currentLoginCode = data.code;
+                    document.getElementById('botLink').href = data.bot_link;
+                    pollInterval = setInterval(checkAuth, 2000);
+                }
+            } catch (e) {
+                console.error("Auth init failed", e);
+            }
+        }
+
+        async function checkAuth() {
+            if (!currentLoginCode) return;
+            try {
+                const resp = await fetch(`/api/auth/check_login?code=${currentLoginCode}`);
+                const data = await resp.json();
+                if (data.authenticated) {
+                    clearInterval(pollInterval);
+                    window.location.reload();
+                }
+            } catch (e) {
+                // Ignore network errors in polling
+            }
+        }
+
+        initAuth();
+
+        async function loadUsers() {
+            try {
+                const resp = await fetch('/api/auth/users');
+                const data = await resp.json();
+                document.getElementById('userList').textContent = Object.values(data.users).join(', ');
+            } catch (e) {
+                document.getElementById('userList').textContent = '—';
+            }
+        }
+        loadUsers();
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('userId').value;
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('errorMsg');
+
+            if (!userId) { err.textContent = 'Введите Telegram ID'; err.style.display = 'block'; return; }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Вход...';
+            err.style.display = 'none';
+
+            try {
+                const form = new FormData();
+                form.append('user_id', userId);
+                const resp = await fetch('/api/auth/login', { method: 'POST', body: form });
+                if (!resp.ok) {
+                    const data = await resp.json();
+                    err.textContent = data.detail || '⛔ Доступ запрещён';
+                    err.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = '🔑 Войти';
+                    return;
+                }
+                window.location.href = '/';
+            } catch (e) {
+                err.textContent = 'Ошибка соединения';
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = '🔑 Войти';
+            }
+        });
+
+        document.getElementById('userId').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        });
+    </script>
+</body>
+</html>
