@@ -522,6 +522,56 @@ async def stats_all(request: Request):
     return {"stats": report}
 
 
+@app.get("/api/stats/checks")
+async def stats_checks(request: Request):
+    user_id = request.state.user_id
+    fair_name = await _require_open_shift(user_id)
+    checks = await get_checks(fair_name)
+    if not checks:
+        return {"checks": []}
+    
+    formatted_checks = []
+    for c in checks:
+        formatted_checks.append({
+            "check_id": c["check_id"],
+            "date": c["date"],
+            "total": c["total"],
+            "cashier_name": get_user_name(c["cashier_id"]),
+            "payment_type": c["payment_type"],
+        })
+    return {"checks": formatted_checks}
+
+
+@app.get("/api/stats/check/{check_id}")
+async def stats_check_detail(request: Request, check_id: str):
+    user_id = request.state.user_id
+    fair_name = await _require_open_shift(user_id)
+    
+    checks = await get_checks(fair_name)
+    check_meta = next((c for c in checks if c["check_id"] == check_id), None)
+    if not check_meta:
+        raise HTTPException(404, "Чек не найден.")
+        
+    items = await get_check_items(fair_name, check_id)
+    
+    formatted_items = []
+    for i in items["items"]:
+        formatted_items.append({
+            "name": i["name"],
+            "price": i["price"],
+            "owner_name": get_user_name(i["owner_id"])
+        })
+        
+    return {
+        "check_id": check_id,
+        "date": check_meta["date"],
+        "total": check_meta["total"],
+        "cashier_name": get_user_name(check_meta["cashier_id"]),
+        "payment_type": check_meta["payment_type"],
+        "items": formatted_items
+    }
+
+
 # ─── API: Files ──────────────────────────────────────────────────
 
 def _load_file_meta() -> List[Dict]:
