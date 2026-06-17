@@ -9,6 +9,37 @@ let state = {
     currentTab: 'all',
 };
 
+let pendingCheckouts = [];
+
+function loadPendingCheckouts() {
+    try {
+        const raw = localStorage.getItem('pendingCheckouts');
+        pendingCheckouts = raw ? JSON.parse(raw) : [];
+        renderPendingBadge();
+    } catch (e) {}
+}
+
+function savePendingCheckouts() {
+    try {
+        localStorage.setItem('pendingCheckouts', JSON.stringify(pendingCheckouts));
+        renderPendingBadge();
+    } catch (e) {}
+}
+
+function renderPendingBadge() {
+    const el = document.getElementById('pendingBadge');
+    if (!el) return;
+    if (pendingCheckouts.length === 0) {
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = 'inline-flex';
+    el.innerHTML = `⏳ ${pendingCheckouts.length}`;
+    el.title = pendingCheckouts.map((p, i) =>
+        `${i + 1}. ${p.payment_type} — ${p.cart.reduce((s, c) => s + c.price * c.qty, 0)} лей`
+    ).join('\n');
+}
+
 const ID_ANYA = 4013760;
 const ID_NINA = 141076129;
 
@@ -17,6 +48,7 @@ const USER_NAME = document.querySelector('meta[name="user-name"]').getAttribute(
 
 // ─── Init ───────────────────────────────────────────────
 async function init() {
+    loadPendingCheckouts();
     await loadFair();
     await loadProducts();
 }
@@ -303,28 +335,59 @@ function updateCart() {
 
 async function checkout(paymentType) {
     if (state.cart.length === 0) return;
+    const cart = state.cart.map(i => ({ ...i }));
     const successScreen = document.getElementById('successScreen');
     successScreen.classList.add('show');
 
     setTimeout(async () => {
         try {
-            const data = await api('/api/sales', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cart: state.cart,
-                    payment_type: paymentType,
-                }),
-            });
+            await postSale(cart, paymentType);
             state.cart = [];
             updateCart();
             setTimeout(() => { successScreen.classList.remove('show'); }, 500);
             loadFair();
         } catch (e) {
-            alert('Ошибка: ' + e.message);
             successScreen.classList.remove('show');
+            const save = confirm(`❌ Не удалось пробить чек: ${e.message}\n\nСохранить чек в очередь и повторить позже?`);
+            if (save) {
+                pendingCheckouts.push({ cart, payment_type: paymentType, created: new Date().toISOString() });
+                savePendingCheckouts();
+                state.cart = [];
+                updateCart();
+                alert('⏳ Чек сохранён в очередь. Когда интернет появится — нажмите на значок ⏳ в шапке.');
+            }
         }
     }, 1200);
+}
+
+async function postSale(cart, paymentType) {
+    return await api('/api/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart, payment_type: paymentType }),
+    });
+}
+
+async function retryPendingCheckouts() {
+    if (pendingCheckouts.length === 0) return;
+    const todo = [...pendingCheckouts];
+    let retried = 0;
+    for (const p of todo) {
+        try {
+            await postSale(p.cart, p.payment_type);
+            pendingCheckouts = pendingCheckouts.filter(x => x !== p);
+            retried++;
+        } catch (e) {
+            console.error('Retry failed:', e);
+        }
+    }
+    savePendingCheckouts();
+    if (retried > 0) {
+        alert(`✅ Отправлено ${retried} чек(ов) из очереди.`);
+        loadFair();
+    } else {
+        alert('❌ Не удалось отправить ни одного чека. Проверьте подключение.');
+    }
 }
 
 // ─── Stats ─────────────────────────────────────────────
