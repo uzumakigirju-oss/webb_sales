@@ -27,7 +27,8 @@ from database import (
     init_db, db_get_user_fair, db_set_user_fair, db_remove_user_fair,
     db_get_shift_owner, db_open_shift, db_close_shift,
     db_get_users_on_fair, db_shift_is_open,
-    db_create_login_code, db_get_login_user
+    db_create_login_code, db_get_login_user,
+    db_migrate_fix_swapped_columns
 )
 from sales_manager import (
     read_products, write_sales_batch, get_current_stats,
@@ -114,6 +115,7 @@ def verify_auth_code(user_id: int, code: str) -> bool:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    await asyncio.to_thread(db_migrate_fix_swapped_columns)
     logger.info("Web app started")
     yield
     logger.info("Web app stopped")

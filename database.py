@@ -166,7 +166,7 @@ def db_write_sales(fair_name: str, rows: List[List], check_id: str = "") -> None
         with get_conn() as conn:
             conn.executemany(
                 "INSERT INTO sales (check_id, date, fair_name, item_name, price, owner_id, cashier_id, payment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                [([check_id, fair_name] + row) for row in rows]
+                [(check_id, row[0], fair_name, row[1], row[2], row[3], row[4], row[5]) for row in rows]
             )
     except sqlite3.Error as e:
         logger.error(f"DB error in db_write_sales: {e}")
@@ -232,3 +232,20 @@ def db_archive_fair_sales(fair_name: str) -> None:
     except sqlite3.Error as e:
         logger.error(f"DB error in db_archive_fair_sales: {e}")
         raise
+
+
+def db_migrate_fix_swapped_columns() -> None:
+    try:
+        with get_conn() as conn:
+            cur = conn.execute("SELECT id, date, fair_name FROM sales WHERE date IN ('Yardsale', 'Ecolocal')")
+            rows = cur.fetchall()
+            if not rows:
+                logger.info("Migration: no rows with swapped columns found")
+                return
+            for r in rows:
+                conn.execute("UPDATE sales SET date = ?, fair_name = ? WHERE id = ?",
+                             (r["fair_name"], r["date"], r["id"]))
+            conn.commit()
+            logger.info(f"Migration: fixed {len(rows)} rows with swapped date/fair_name columns")
+    except sqlite3.Error as e:
+        logger.error(f"DB migration error: {e}")
