@@ -515,6 +515,7 @@ async function showCheckDetail(checkId) {
                 <div class="check-detail-header">
                     <button class="btn-back" onclick="backToChecks()">← Назад</button>
                     <span class="check-detail-title">🧾 Чек</span>
+                    <button class="btn-delete-check" onclick="deleteCheck('${check.check_id}')">🗑</button>
                 </div>
                 <div class="check-detail-meta">
                     <div>${date}</div>
@@ -532,6 +533,17 @@ async function showCheckDetail(checkId) {
         `;
     } catch (e) {
         detailEl.innerHTML = `<p class="hint">❌ ${e.message}</p>`;
+    }
+}
+
+async function deleteCheck(checkId) {
+    if (!confirm('Удалить этот чек?')) return;
+    try {
+        await api(`/api/stats/check/${checkId}`, { method: 'DELETE' });
+        backToChecks();
+        loadChecks();
+    } catch (e) {
+        alert('Ошибка удаления: ' + e.message);
     }
 }
 

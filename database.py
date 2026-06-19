@@ -234,6 +234,16 @@ def db_archive_fair_sales(fair_name: str) -> None:
         raise
 
 
+def db_delete_check(fair_name: str, check_id: str) -> None:
+    try:
+        with get_conn() as conn:
+            conn.execute("DELETE FROM sales WHERE fair_name = ? AND check_id = ?", (fair_name, check_id))
+            conn.commit()
+    except sqlite3.Error as e:
+        logger.error(f"DB error in db_delete_check: {e}")
+        raise
+
+
 def db_migrate_fix_swapped_columns() -> None:
     try:
         with get_conn() as conn:

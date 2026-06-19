@@ -483,6 +483,19 @@ header {
   transition: background 0.15s;
 }
 .btn-back:active { background: var(--border); transform: scale(0.96); }
+.btn-delete-check {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: auto;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+  opacity: 0.6;
+}
+.btn-delete-check:hover { opacity: 1; background: rgba(232, 122, 122, 0.15); }
+.btn-delete-check:active { transform: scale(0.9); }
 .check-detail-title { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
 .check-detail-meta {
   font-size: 13px;

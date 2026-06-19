@@ -49,6 +49,26 @@ async def start_handler(message: types.Message) -> None:
         reply_markup=web_app_btn(), parse_mode="HTML")
 
 
+@router.message(Command("link"))
+async def share_webapp_link(message: types.Message) -> None:
+    if not message.from_user or message.from_user.id not in ALLOWED_USERS:
+        return
+    url = get_web_app_url()
+    sent = 0
+    for uid in ALLOWED_USERS:
+        try:
+            await message.bot.send_message(
+                uid,
+                f"🌐 <b>Ссылка на веб-кассу:</b>\n\n{url}\n\n"
+                f"Откройте в браузере на телефоне или компьютере.",
+                parse_mode="HTML"
+            )
+            sent += 1
+        except Exception as e:
+            logger.error(f"Failed to send link to {uid}: {e}")
+    await message.answer(f"✅ Ссылка отправлена {sent} пользователям.")
+
+
 @router.message(Command("refresh"))
 async def refresh_products(message: types.Message) -> None:
     if not message.from_user or message.from_user.id not in ALLOWED_USERS:

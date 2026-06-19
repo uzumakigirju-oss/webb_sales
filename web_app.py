@@ -28,7 +28,8 @@ from database import (
     db_get_shift_owner, db_open_shift, db_close_shift,
     db_get_users_on_fair, db_shift_is_open,
     db_create_login_code, db_get_login_user,
-    db_migrate_fix_swapped_columns
+    db_migrate_fix_swapped_columns,
+    db_delete_check
 )
 from sales_manager import (
     read_products, write_sales_batch, get_current_stats,
@@ -570,6 +571,15 @@ async def stats_check_detail(request: Request, check_id: str):
         "payment_type": check_meta["payment_type"],
         "items": formatted_items
     }
+
+
+@app.delete("/api/stats/check/{check_id}")
+async def delete_check(request: Request, check_id: str):
+    user_id = request.state.user_id
+    fair_name = await _require_open_shift(user_id)
+    await asyncio.to_thread(db_delete_check, fair_name, check_id)
+    logger.info(f"Check {check_id} deleted by {get_user_name(user_id)} ({user_id}) on {fair_name}")
+    return {"ok": True}
 
 
 # ─── API: Files ──────────────────────────────────────────────────
