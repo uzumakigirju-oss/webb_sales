@@ -167,11 +167,13 @@ header {
   display: flex;
   gap: 6px;
   margin-bottom: 14px;
-  background: var(--surface2);
+  background: var(--surface);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--surface-border);
   padding: 4px;
   border-radius: 14px;
+  box-shadow: var(--shadow);
 }
 .tab-btn {
   flex: 1;
@@ -186,7 +188,7 @@ header {
   color: var(--text2);
 }
 .tab-btn.active {
-  background: var(--surface);
+  background: var(--surface-solid);
   color: var(--text);
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
@@ -195,8 +197,10 @@ header {
   gap: 4px;
   margin-bottom: 12px;
   padding: 3px;
-  background: var(--surface2);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
 }
 .tab-btn.small {
   flex: 1;
@@ -210,7 +214,7 @@ header {
   color: var(--text2);
   transition: all 0.25s;
 }
-.tab-btn.small.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.tab-btn.small.active { background: var(--surface-solid); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
