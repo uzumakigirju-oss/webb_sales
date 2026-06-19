@@ -58,3 +58,4 @@ shared_files.json
 
 # Binary
 ngrok
+cloudflared
