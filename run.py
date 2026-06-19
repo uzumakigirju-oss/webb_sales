@@ -7,6 +7,7 @@ import signal
 
 PID_DIR = ".pids"
 CLOUDFLARED_PATH = os.path.expanduser("~/.local/bin/cloudflared")
+CLOUDFLARED_LOG = os.path.join(PID_DIR, "cloudflared.log")
 
 def ensure_pid_dir():
     os.makedirs(PID_DIR, exist_ok=True)
@@ -38,18 +39,20 @@ def kill_process(name: str):
         except OSError:
             pass
 
-def get_cloudflared_url(process, timeout=15):
+def get_cloudflared_url(log_path, timeout=30):
     start = time.time()
     while time.time() - start < timeout:
-        line = process.stderr.readline()
-        if not line:
-            continue
-        line = line.decode("utf-8", errors="ignore").strip()
-        if line:
-            print(f"  cloudflared: {line}")
-        m = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
-        if m:
-            return m.group(0)
+        try:
+            with open(log_path, "r") as f:
+                content = f.read()
+                m = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", content)
+                if m:
+                    last_line = content.strip().split("\n")[-1]
+                    print(f"  cloudflared: {last_line}")
+                    return m.group(0)
+        except OSError:
+            pass
+        time.sleep(1)
     return None
 
 def kill_old_processes():
@@ -71,13 +74,15 @@ def main():
 
     time.sleep(2)
 
+    cf_log = open(CLOUDFLARED_LOG, "w")
     cf_process = subprocess.Popen(
         [CLOUDFLARED_PATH, "tunnel", "--url", "http://localhost:8000", "--no-autoupdate"],
-        stderr=subprocess.PIPE, stdout=subprocess.DEVNULL
+        stderr=cf_log, stdout=subprocess.DEVNULL
     )
     write_pid("cloudflared", cf_process.pid)
+    cf_log.close()
 
-    url = get_cloudflared_url(cf_process)
+    url = get_cloudflared_url(CLOUDFLARED_LOG)
     if url:
         with open(".current_url", "w") as f:
             f.write(url)
