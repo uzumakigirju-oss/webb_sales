@@ -3,7 +3,7 @@ import urllib.parse
 from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-from config import WEB_APP_URL
+from config import get_web_app_url
 from sales_manager import read_products
 
 def get_choose_fair_kb() -> types.ReplyKeyboardMarkup:
@@ -29,7 +29,8 @@ async def get_products_kb() -> types.ReplyKeyboardMarkup:
     catalog_json = json.dumps(products)
     encoded_catalog = urllib.parse.quote(catalog_json)
 
-    web_app_url = f"{WEB_APP_URL}?v=2&catalog={encoded_catalog}"
+    base_url = get_web_app_url()
+    web_app_url = f"{base_url}?v=2&catalog={encoded_catalog}"
 
     builder.button(text="🛒 Открыть кассу", web_app=WebAppInfo(url=web_app_url))
     builder.adjust(1)

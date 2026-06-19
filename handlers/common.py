@@ -3,13 +3,19 @@ import logging
 from datetime import datetime
 from aiogram import Router, F, types
 from aiogram.filters import Command
-from config import ALLOWED_USERS
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from config import ALLOWED_USERS, get_web_app_url
 from database import db_get_user_fair, db_shift_is_open, db_remove_user_fair, db_set_user_fair, db_open_shift, db_set_login_user
 from keyboards import get_choose_fair_kb, get_start_kb, get_products_kb, get_join_or_switch_kb
-from sales_manager import read_my_sales_sync, get_fair_lock, init_shift_sync
+from sales_manager import read_my_sales_sync, get_fair_lock, init_shift_sync, invalidate_products_cache
 
 logger = logging.getLogger(__name__)
 router = Router()
+
+def web_app_btn() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🛒 Открыть веб-кассу", web_app=WebAppInfo(url=get_web_app_url()))]
+    ])
 
 @router.message(Command("start"))
 async def start_handler(message: types.Message) -> None:
@@ -34,7 +40,21 @@ async def start_handler(message: types.Message) -> None:
         return
 
     await asyncio.to_thread(db_remove_user_fair, message.from_user.id)
-    await message.answer("Доброе утро! Выберите ярмарку:", reply_markup=get_choose_fair_kb())
+    await message.answer(
+        f"👋 Доброе утро!\n\n"
+        f"Выберите ярмарку ниже или откройте веб-кассу по кнопке:",
+        reply_markup=get_choose_fair_kb())
+    await message.answer(
+        "🌐 <b>Веб-касса</b> — полноценный интерфейс в браузере:",
+        reply_markup=web_app_btn(), parse_mode="HTML")
+
+
+@router.message(Command("refresh"))
+async def refresh_products(message: types.Message) -> None:
+    if not message.from_user or message.from_user.id not in ALLOWED_USERS:
+        return
+    invalidate_products_cache()
+    await message.answer("✅ Кэш товаров сброшен. Товары будут загружены заново при следующем обращении.")
 
 
 @router.message(F.text.in_(["🎪 Yardsale", "🌿 Ecolocal", "🔙 Сменить ярмарку"]))

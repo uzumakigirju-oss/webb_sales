@@ -5,68 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omnom & SweetMe — Вход</title>
     <style>
+        :root {
+            --bg: linear-gradient(160deg, #fef6f3 0%, #fef0ea 50%, #fceae5 100%);
+            --card-bg: rgba(255,255,255,0.82);
+            --card-border: rgba(230,210,200,0.3);
+            --text: #3a2a24;
+            --text2: #8a7a74;
+            --primary: #e8907a;
+            --primary-dark: #d47860;
+            --input-border: rgba(220,200,190,0.4);
+            --input-focus: #e8907a;
+            --shadow: 0 20px 60px rgba(160,120,100,0.12);
+            --blur: blur(18px);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: linear-gradient(160deg, #1e1816 0%, #231d1a 50%, #1a1513 100%);
+                --card-bg: rgba(50,42,38,0.88);
+                --card-border: rgba(100,85,78,0.25);
+                --text: #e8ddd8;
+                --text2: #9a8a84;
+                --primary: #d4a090;
+                --input-border: rgba(80,68,62,0.4);
+                --input-focus: #d4a090;
+                --shadow: 0 20px 60px rgba(0,0,0,0.4);
+            }
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #fce4ec, #f8bbd0, #f48fb1);
+            background: var(--bg);
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-font-smoothing: antialiased;
         }
         .card {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
             padding: 40px 32px;
             max-width: 400px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow);
         }
         .logo { font-size: 56px; margin-bottom: 12px; }
         h1 {
             font-size: 24px;
-            color: #5d4037;
+            color: var(--text);
             margin-bottom: 4px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
         .subtitle {
-            color: #8d6e63;
+            color: var(--text2);
             font-size: 14px;
             margin-bottom: 28px;
         }
         .form-group { display: flex; flex-direction: column; gap: 12px; }
         .form-group input {
             padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            border: 1.5px solid var(--input-border);
+            border-radius: 14px;
             font-size: 16px;
             text-align: center;
             outline: none;
             transition: border 0.2s;
+            background: transparent;
+            color: var(--text);
         }
-        .form-group input:focus { border-color: #f48fb1; }
+        .form-group input:focus { border-color: var(--input-focus); }
         .form-group button {
             padding: 14px;
-            background: #e91e63;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
-        .form-group button:hover { background: #c2185b; }
+        .form-group button:active { transform: scale(0.97); }
         .form-group button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .error { color: #d32f2f; font-size: 13px; margin-top: 8px; display: none; }
-        .user-hint { font-size: 12px; color: #999; margin-top: 6px; }
-        .user-hint span { color: #5d4037; font-weight: 600; }
+        .error { color: #e87a7a; font-size: 13px; margin-top: 8px; display: none; }
+        .user-hint { font-size: 12px; color: var(--text2); margin-top: 6px; }
+        .user-hint span { color: var(--text); font-weight: 600; }
         .help {
             margin-top: 20px;
             font-size: 12px;
-            color: #aaa;
+            color: var(--text2);
             line-height: 1.8;
+            opacity: 0.7;
+        }
+        .btn-telegram {
+            display: block;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border-radius: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background 0.2s, transform 0.1s;
+            margin: 20px 0;
+        }
+        .btn-telegram:active { transform: scale(0.97); }
+        .hint-text {
+            font-size: 13px;
+            color: var(--text2);
+            margin-top: 10px;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -78,15 +132,15 @@
 
         <form class="form-group" id="loginForm" style="display: none;">
             <input type="number" id="userId" placeholder="Ваш Telegram ID">
-            <button type="submit" id="loginBtn">🔑 Войти вручную (Для отладки)</button>
+            <button type="submit" id="loginBtn">🔑 Войти</button>
             <div class="error" id="errorMsg"></div>
         </form>
 
-        <div id="telegramAuthBlock" style="margin: 20px 0;">
-            <a id="botLink" href="#" target="_blank" style="display: block; padding: 14px; background: #0088cc; color: white; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 16px;">
+        <div id="telegramAuthBlock">
+            <a id="botLink" href="#" target="_blank" class="btn-telegram">
                 ✈️ Войти через Telegram-бота
             </a>
-            <p style="font-size: 13px; color: #666; margin-top: 10px;">
+            <p class="hint-text">
                 Нажмите на кнопку, перейдите в бота и нажмите СТАРТ. Страница обновится автоматически.
             </p>
         </div>
@@ -98,7 +152,7 @@
 
         <div class="help">
             <b>Как войти?</b><br>
-            Введите ваш Telegram ID и нажмите "Войти"
+            Введите ваш Telegram ID или войдите через бота
         </div>
     </div>
 
@@ -129,9 +183,7 @@
                     clearInterval(pollInterval);
                     window.location.reload();
                 }
-            } catch (e) {
-                // Ignore network errors in polling
-            }
+            } catch (e) {}
         }
 
         initAuth();
@@ -152,13 +204,10 @@
             const userId = document.getElementById('userId').value;
             const btn = document.getElementById('loginBtn');
             const err = document.getElementById('errorMsg');
-
             if (!userId) { err.textContent = 'Введите Telegram ID'; err.style.display = 'block'; return; }
-
             btn.disabled = true;
             btn.textContent = '⏳ Вход...';
             err.style.display = 'none';
-
             try {
                 const form = new FormData();
                 form.append('user_id', userId);

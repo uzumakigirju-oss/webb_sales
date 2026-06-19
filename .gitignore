@@ -49,3 +49,12 @@ sales_*.csv
 /archives/
 /shared_files/
 shared_files.json
+
+# PID files
+.pids/
+
+# Dynamic URL
+.current_url
+
+# Binary
+ngrok

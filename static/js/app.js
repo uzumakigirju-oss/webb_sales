@@ -46,6 +46,10 @@ const ID_NINA = 141076129;
 const USER_ID = parseInt(document.querySelector('meta[name="user-id"]').getAttribute('content'));
 const USER_NAME = document.querySelector('meta[name="user-name"]').getAttribute('content');
 
+function haptic(ms = 8) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
 // ─── Init ───────────────────────────────────────────────
 async function init() {
     loadPendingCheckouts();
@@ -247,6 +251,7 @@ function getImageUrl(name, ownerId) {
 
 // ─── POS (Products grid + Cart) ────────────────────────
 function setProductTab(tab) {
+    haptic(6);
     state.currentTab = tab;
     document.querySelectorAll('[data-prod-tab]').forEach(b => b.classList.remove('active'));
     document.querySelector(`[data-prod-tab="${tab}"]`).classList.add('active');
@@ -285,6 +290,7 @@ function renderProducts() {
 }
 
 function addToCart(product) {
+    haptic();
     let item = state.cart.find(i => i.name === product.name && i.price === product.price);
     if (item) item.qty = (item.qty || 1) + 1;
     else state.cart.push({ ...product, qty: 1 });
@@ -292,18 +298,21 @@ function addToCart(product) {
 }
 
 function changeQty(index, delta) {
+    haptic(6);
     state.cart[index].qty += delta;
     if (state.cart[index].qty <= 0) state.cart.splice(index, 1);
     updateCart();
 }
 
 function removeItem(index) {
+    haptic(10);
     state.cart.splice(index, 1);
     updateCart();
 }
 
 function clearCart() {
     if (state.cart.length === 0) return;
+    haptic(12);
     state.cart = [];
     updateCart();
 }
@@ -335,6 +344,7 @@ function updateCart() {
 
 async function checkout(paymentType) {
     if (state.cart.length === 0) return;
+    haptic(15);
     const cart = state.cart.map(i => ({ ...i }));
     const successScreen = document.getElementById('successScreen');
     successScreen.classList.add('show');

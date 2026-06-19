@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-# Загружаем переменные из .env
 load_dotenv()
 
 API_TOKEN = os.getenv("BOT_TOKEN")
@@ -11,9 +10,21 @@ if not API_TOKEN:
 PRODUCTS_FILE = os.getenv("PRODUCTS_FILE", "products.csv")
 WEB_APP_URL = os.getenv("WEB_APP_URL", "https://uzumakigirju-oss.github.io/kassa-app/")
 
-# Разрешенные пользователи
 ALLOWED_USERS = {
     141076129: "Нина",
     330619718: "Александр",
     4013760: "Анна"
 }
+
+CURRENT_URL_FILE = ".current_url"
+
+def get_web_app_url() -> str:
+    try:
+        if os.path.exists(CURRENT_URL_FILE):
+            with open(CURRENT_URL_FILE, "r") as f:
+                url = f.read().strip()
+                if url:
+                    return url
+    except Exception:
+        pass
+    return WEB_APP_URL
